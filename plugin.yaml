@@ -1,5 +1,5 @@
 name: "workflow"
-version: "0.2.9"
+version: "0.2.10"
 repository: github.com/weeros/trivy-plugin-workflow
 maintainer: weeros
 output: false
@@ -13,14 +13,19 @@ platforms:
       arch: amd64
     uri: ./trivy-workflow # where the execution file is (local file, http, git, etc.)
     bin: ./trivy-workflow # path to the execution file
-  - selector: # optional
-      os: linux
-      arch: amd64
-    #uri: ./trivy-workflow
-    uri: https://github.com/weeros/trivy-plugin-workflow/releases/download/v0.2.9/trivy-workflow.tar.gz
-    bin: ./trivy-workflow
   - selector:
       os: darwin
       arch: arm64
     uri: ./trivy-workflow
+    bin: ./trivy-workflow
+  - selector: # optional
+      os: linux
+      arch: amd64
+    #uri: ./trivy-workflow
+    uri: https://github.com/weeros/trivy-plugin-workflow/releases/download/v0.2.10/trivy-workflow.tar.gz
+    bin: ./trivy-workflow
+  - selector: # optional
+      os: linux
+      arch: arm64
+    uri: https://github.com/weeros/trivy-plugin-workflow/releases/download/v0.2.10/trivy-workflow.tar.gz
     bin: ./trivy-workflow
