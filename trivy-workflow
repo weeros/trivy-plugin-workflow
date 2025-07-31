@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 SCAN_REPORT_PATH="reports"
 
@@ -19,7 +19,8 @@ SCAN_IMAGE_SEVERITY_TRIGGER="CRITICAL"
 
 
 # Usage
-function usage() {
+usage()
+{
   cat << EOS >&2
 Usage: trivy workflow [-h,--help] TYPE 
  A Trivy plugin that workflow scans.
@@ -40,7 +41,7 @@ EOS
   exit
 }
 
-function report() {
+report() {
   if [ -d ${SCAN_REPORT_PATH} ]; then
       echo "### folder ${SCAN_REPORT_PATH} already exist"
   else
@@ -49,7 +50,7 @@ function report() {
   fi
 }
 
-function scan_fs() {
+scan_fs() {
   SCAN_FS_PATH=$1
   echo "scan: $SCAN_FS_PATH"
   trivy fs --download-db-only 
@@ -62,7 +63,7 @@ function scan_fs() {
   trivy fs --exit-code ${SCAN_FS_ERROR} --severity "${SCAN_FS_SEVERITY_TRIGGER}" --ignorefile /trivyignore.yaml --show-suppressed "${SCAN_FS_PATH}"
 }
 
-function scan_secret() {
+scan_secret() {
   SCAN_FS_PATH=$1
   echo "scan: $SCAN_FS_PATH"
   trivy fs --download-db-only 
@@ -75,7 +76,7 @@ function scan_secret() {
   trivy fs --scanners secret --exit-code ${SCAN_FS_ERROR} --severity "${SCAN_FS_SEVERITY_TRIGGER}" --ignorefile /trivyignore.yaml --show-suppressed "${SCAN_FS_PATH}"
 }
 
-function scan_image() {
+scan_image() {
   IMAGE_NAME=$1
   TRIVY_PKG_TYPES="os"
   echo "scan: ${IMAGE_NAME}"
@@ -89,7 +90,7 @@ function scan_image() {
   trivy image --exit-code ${SCAN_IMAGE_ERROR} --severity "${SCAN_IMAGE_SEVERITY_TRIGGER}" --ignorefile /trivyignore.yaml --show-suppressed "${IMAGE_NAME}"   
 }
 
-function scan_sbom() {
+scan_sbom() {
   SCAN_SBOM_FILE=$1
   echo "scan: ${SCAN_SBOM_FILE}"
   trivy sbom --download-db-only 
@@ -102,42 +103,19 @@ function scan_sbom() {
   trivy sbom --exit-code ${SCAN_SBOM_ERROR}  --severity "${SCAN_SBOM_SEVERITY_TRIGGER}" --ignorefile /trivyignore.yaml --show-suppressed "${SCAN_SBOM_FILE}"
 }
 
+if [ $1 = "fs" ]; then
+  report;
+  scan_fs $2;
+elif [ $1 = "sbom" ]; then
+  report;
+  scan_sbom $2;
+elif [ $1 = "secret" ]; then
+  report;
+  scan_secret $2;
+elif [ $1 = "image" ]; then
+  report;
+  scan_image $2;
+else
+  usage
+fi
 
-
-while [[ $# -gt 0 ]]; do
-  case $1 in
-    -f|--fs)
-      report;
-      scan_fs $2;
-      shift # Past argument.
-      shift # Past value.
-      ;;
-    -i|--image)
-      report;
-      scan_image $2;
-      shift # Past value.
-      shift # Past value.
-      ;;
-    -s|--sbom)
-      report;
-      scan_sbom $2;
-      shift # Past argument.
-      shift # Past value.
-      ;;
-    -t|--secret)
-      report;
-      scan_secret $2;
-      shift # Past argument.
-      shift # Past value.
-      ;;
-    -*|--*)
-      echo "Invalid option: $1"
-      usage
-      exit 1
-      ;;
-    *)
-      usage
-      exit 1
-      ;;
-  esac
-done

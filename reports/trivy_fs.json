@@ -1,0 +1,17 @@
+{
+  "SchemaVersion": 2,
+  "CreatedAt": "2025-08-01T00:08:56.29455114+02:00",
+  "ArtifactName": ".",
+  "ArtifactType": "filesystem",
+  "Metadata": {
+    "RepoURL": "git@github.com:weeros/trivy-plugin-workflow.git",
+    "Branch": "main",
+    "Tags": [
+      "v0.2.10"
+    ],
+    "Commit": "bc9a427fe020e9b292656f0c9b7a920c04d48875",
+    "CommitMsg": "fix: version",
+    "Author": "Weeros \u003cweeros@protonmail.com\u003e",
+    "Committer": "Weeros \u003cweeros@protonmail.com\u003e"
+  }
+}
