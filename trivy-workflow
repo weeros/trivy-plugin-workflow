@@ -1,0 +1,125 @@
+#!/bin/bash
+
+SCAN_REPORT_PATH="reports"
+
+SCAN_FS_ERROR=130
+SCAN_FS_SEVERITY_DISPLAY="UNKNOWN,LOW,MEDIUM,HIGH" 
+SCAN_FS_SEVERITY_TRIGGER="CRITICAL"
+
+
+SCAN_SBOM_ERROR=130
+SCAN_SBOM_FILE="reports/trivy_fs.cdx.json"
+SCAN_SBOM_SEVERITY_DISPLAY="UNKNOWN,LOW,MEDIUM,HIGH" 
+SCAN_SBOM_SEVERITY_TRIGGER="CRITICAL"
+
+
+SCAN_IMAGE_ERROR=130
+SCAN_IMAGE_SEVERITY_DISPLAY="UNKNOWN,LOW,MEDIUM,HIGH" 
+SCAN_IMAGE_SEVERITY_TRIGGER="CRITICAL"
+
+
+# Usage
+function usage() {
+  cat << EOS >&2
+Usage: trivy workflow [-h,--help] TYPE 
+ A Trivy plugin that workflow scans.
+
+Options:
+  -h, --help    Show usage.
+
+Examples:
+  # Scan a filesystem
+  trivy workflow --fs
+
+  # Scan a sbom file
+  trivy workflow --sbom
+
+  # Scan an image
+  trivy workflow --image
+EOS
+  exit
+}
+
+function report() {
+  if [ -d ${SCAN_REPORT_PATH} ]; then
+      echo "### folder ${SCAN_REPORT_PATH} already exist"
+  else
+      echo "### create folder ${SCAN_REPORT_PATH}"
+      mkdir "${SCAN_REPORT_PATH}"
+  fi
+}
+
+function scan_fs() {
+  SCAN_FS_PATH=$1
+  echo "scan: $SCAN_FS_PATH"
+  trivy fs --download-db-only 
+  trivy fs --exit-code 0 --format json --output "${SCAN_REPORT_PATH}/trivy_fs.json" "${SCAN_FS_PATH}"
+  trivy fs --exit-code 0 --format sarif --output "${SCAN_REPORT_PATH}/trivy_fs.sarif" "${SCAN_FS_PATH}"
+  trivy fs --exit-code 0 --format template --template "@/contrib/junit.tpl" --output "${SCAN_REPORT_PATH}/trivy_fs.junitxml.xml" "${SCAN_FS_PATH}"
+  trivy fs --exit-code 0 --format template --template "@/contrib/html.tpl"  --output "${SCAN_REPORT_PATH}/trivy_fs.html" "${SCAN_FS_PATH}"
+  trivy fs --exit-code 0 --format cyclonedx --output "${SCAN_REPORT_PATH}/trivy_fs.cdx.json" "${SCAN_FS_PATH}"
+  trivy fs --exit-code 0 --severity ${SCAN_FS_SEVERITY_DISPLAY} "${SCAN_FS_PATH}"
+  trivy fs --exit-code ${SCAN_FS_ERROR} --severity "${SCAN_FS_SEVERITY_TRIGGER}" --ignorefile /trivyignore.yaml --show-suppressed "${SCAN_FS_PATH}"
+
+}
+
+function scan_image() {
+  IMAGE_NAME=$1
+  TRIVY_PKG_TYPES="os"
+  echo "scan: ${IMAGE_NAME}"
+  trivy image --download-db-only 
+  trivy image --exit-code 0 --format json --output "${SCAN_REPORT_PATH}/trivy_image.json" "${IMAGE_NAME}"
+  trivy image --exit-code 0 --format sarif --output "${SCAN_REPORT_PATH}/trivy_image.sarif" "${IMAGE_NAME}"
+  trivy image --exit-code 0 --format template --template "@/contrib/junit.tpl" --output "${SCAN_REPORT_PATH}/trivy_image_junitxml.xml" "${IMAGE_NAME}"
+  trivy image --exit-code 0 --format template --template "@/contrib/html.tpl"  --output "${SCAN_REPORT_PATH}/trivy_image.html" "${IMAGE_NAME}"
+  trivy image --exit-code 0 --format cyclonedx --output "${SCAN_REPORT_PATH}/trivy_image.cdx.json" "${IMAGE_NAME}" --scanners vuln
+  trivy image --exit-code 0 --severity ${SCAN_IMAGE_SEVERITY_DISPLAY} "${IMAGE_NAME}"
+  trivy image --exit-code ${SCAN_IMAGE_ERROR} --severity "${SCAN_IMAGE_SEVERITY_TRIGGER}" --ignorefile /trivyignore.yaml --show-suppressed "${IMAGE_NAME}"   
+}
+
+function scan_sbom() {
+  SCAN_SBOM_FILE=$1
+  echo "scan: ${SCAN_SBOM_FILE}"
+  trivy sbom --download-db-only 
+  trivy sbom --exit-code 0 --format json --output "${SCAN_REPORT_PATH}/trivy_sbom.json" "${SCAN_SBOM_FILE}"
+  trivy sbom --exit-code 0 --format sarif --output "${SCAN_REPORT_PATH}/trivy_sbom.sarif" "${SCAN_SBOM_FILE}"
+  trivy sbom --exit-code 0 --format template --template "@/contrib/junit.tpl" --output "${SCAN_REPORT_PATH}/trivy_sbom.junitxml.xml" "${SCAN_SBOM_FILE}"
+  trivy sbom --exit-code 0 --format template --template "@/contrib/html.tpl"  --output "${SCAN_REPORT_PATH}/trivy_sbom.html" "${SCAN_SBOM_FILE}"
+  trivy sbom --exit-code 0 --format cyclonedx --output "${SCAN_REPORT_PATH}/trivy_sbom.cdx.json" "${SCAN_SBOM_FILE}"
+  trivy sbom --exit-code 0 --severity ${SCAN_SBOM_SEVERITY_DISPLAY} "${SCAN_SBOM_FILE}"
+  trivy sbom --exit-code ${SCAN_SBOM_ERROR}  --severity "${SCAN_SBOM_SEVERITY_TRIGGER}" --ignorefile /trivyignore.yaml --show-suppressed "${SCAN_SBOM_FILE}"
+}
+
+
+
+while [[ $# -gt 0 ]]; do
+  case $1 in
+    -f|--fs)
+      report;
+      scan_fs $2;
+      shift # Past argument.
+      shift # Past value.
+      ;;
+    -i|--image)
+      report;
+      scan_image $2;
+      shift # Past value.
+      shift # Past value.
+      ;;
+    -s|--sbom)
+      report;
+      scan_sbom $2;
+      shift # Past argument.
+      shift # Past value.
+      ;;
+    -*|--*)
+      echo "Invalid option: $1"
+      usage
+      exit 1
+      ;;
+    *)
+      usage
+      exit 1
+      ;;
+  esac
+done
