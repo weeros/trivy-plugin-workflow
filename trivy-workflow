@@ -126,7 +126,7 @@ while [[ $# -gt 0 ]]; do
       ;;
     -t|--secret)
       report;
-      scan_sbom $2;
+      scan_secret $2;
       shift # Past argument.
       shift # Past value.
       ;;
