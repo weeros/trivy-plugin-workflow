@@ -4,7 +4,7 @@
   "ArtifactName": ".",
   "ArtifactType": "filesystem",
   "Metadata": {
-    "RepoURL": "git@github.com:weeros/trivy-plugin-workflow.git",
+    "RepoURL": "git@github.com:weeros/trivy-plugin-lp-workflow.git",
     "Branch": "main",
     "Tags": [
       "v0.2.10"

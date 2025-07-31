@@ -15,11 +15,11 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
       - name: Compress
-        run: tar -zcvf trivy-workflow.tar.gz trivy-workflow LICENSE
+        run: tar -zcvf trivy-lp-workflow.tar.gz trivy-lp-workflow LICENSE
       - name: Release
         uses: softprops/action-gh-release@v2
         with:
           files: |
-            trivy-workflow.tar.gz
+            trivy-lp-workflow.tar.gz
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -1,31 +1,31 @@
-name: "workflow"
-version: "0.2.12"
-repository: github.com/weeros/trivy-plugin-workflow
+name: "lp-workflow"
+version: "0.3.0"
+repository: github.com/weeros/trivy-plugin-lp-workflow
 maintainer: weeros
 output: false
-summary: Scan filesystem,image,sbom resources
+summary: Plugin Demo to SysOps Magazine
 description: |-
-  A Trivy plugin that workflow scans.
-  Usage: trivy workflow TYPE
+  A Demonstrate Trivy plugin that workflow scans.
+  Usage: trivy lp-workflow TYPE ARG
 platforms:
   - selector: # optional
       os: darwin
       arch: amd64
-    uri: ./trivy-workflow # where the execution file is (local file, http, git, etc.)
-    bin: ./trivy-workflow # path to the execution file
+    uri: ./trivy-lp-workflow # where the execution file is (local file, http, git, etc.)
+    bin: ./trivy-lp-workflow # path to the execution file
   - selector:
       os: darwin
       arch: arm64
-    uri: ./trivy-workflow
-    bin: ./trivy-workflow
+    uri: ./trivy-lp-workflow
+    bin: ./trivy-lp-workflow
   - selector: # optional
       os: linux
       arch: amd64
-    #uri: ./trivy-workflow
-    uri: https://github.com/weeros/trivy-plugin-workflow/releases/download/v0.2.12/trivy-workflow.tar.gz
-    bin: ./trivy-workflow
+    #uri: ./trivy-lp-workflow
+    uri: https://github.com/weeros/trivy-plugin-lp-workflow/releases/download/v0.3.0/trivy-lp-workflow.tar.gz
+    bin: ./trivy-lp-workflow
   - selector: # optional
       os: linux
       arch: arm64
-    uri: https://github.com/weeros/trivy-plugin-workflow/releases/download/v0.2.12/trivy-workflow.tar.gz
-    bin: ./trivy-workflow
+    uri: https://github.com/weeros/trivy-plugin-lp-workflow/releases/download/v0.3.0/trivy-lp-workflow.tar.gz
+    bin: ./trivy-lp-workflow

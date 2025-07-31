@@ -22,24 +22,21 @@ SCAN_IMAGE_SEVERITY_TRIGGER="CRITICAL"
 usage()
 {
   cat << EOS >&2
-Usage: trivy workflow [-h,--help] TYPE OPTION
- A Trivy plugin that workflow scans.
-
-Options:
-  -h, --help    Show usage.
+Usage: trivy lp-workflow TYPE ARG
+ A Trivy plugin that lp-workflow scans.
 
 Examples:
   # Scan a filesystem
-  trivy workflow fs .
+  trivy lp-workflow fs .
   
   # Scan a secret
-  trivy workflow secret .
+  trivy lp-workflow secret .
 
   # Scan a sbom file
-  trivy workflow sbom file.cdx.json
+  trivy lp-workflow sbom file.cdx.json
 
   # Scan an image
-  trivy workflow image app:latest
+  trivy lp-workflow image app:latest
 EOS
   exit
 }
@@ -61,7 +58,7 @@ scan_fs() {
   trivy fs --exit-code 0 --format sarif --output "${SCAN_REPORT_PATH}/trivy_fs.sarif" "${SCAN_FS_PATH}"
   trivy fs --exit-code 0 --format template --template "@/contrib/junit.tpl" --output "${SCAN_REPORT_PATH}/trivy_fs.junitxml.xml" "${SCAN_FS_PATH}"
   trivy fs --exit-code 0 --format template --template "@/contrib/html.tpl"  --output "${SCAN_REPORT_PATH}/trivy_fs.html" "${SCAN_FS_PATH}"
-  trivy fs --exit-code 0 --format cyclonedx --output "${SCAN_REPORT_PATH}/trivy_fs.cdx.json" "${SCAN_FS_PATH}"
+  trivy fs --exit-code 0 --format cyclonedx --output "${SCAN_REPORT_PATH}/trivy_fs.cdx.json" --scanners vuln "${SCAN_FS_PATH}"
   trivy fs --exit-code 0 --severity ${SCAN_FS_SEVERITY_DISPLAY} "${SCAN_FS_PATH}"
   trivy fs --exit-code ${SCAN_FS_ERROR} --severity "${SCAN_FS_SEVERITY_TRIGGER}" --ignorefile /trivyignore.yaml --show-suppressed "${SCAN_FS_PATH}"
 }
@@ -74,7 +71,7 @@ scan_secret() {
   trivy fs --scanners secret --exit-code 0 --format sarif --output "${SCAN_REPORT_PATH}/trivy_fs.sarif" "${SCAN_FS_PATH}"
   trivy fs --scanners secret --exit-code 0 --format template --template "@/contrib/junit.tpl" --output "${SCAN_REPORT_PATH}/trivy_fs.junitxml.xml" "${SCAN_FS_PATH}"
   trivy fs --scanners secret --exit-code 0 --format template --template "@/contrib/html.tpl"  --output "${SCAN_REPORT_PATH}/trivy_fs.html" "${SCAN_FS_PATH}"
-  trivy fs --scanners secret --exit-code 0 --format cyclonedx --output "${SCAN_REPORT_PATH}/trivy_fs.cdx.json" "${SCAN_FS_PATH}"
+  trivy fs --scanners secret --exit-code 0 --format cyclonedx --output "${SCAN_REPORT_PATH}/trivy_fs.cdx.json" --scanners vuln "${SCAN_FS_PATH}"
   trivy fs --scanners secret --exit-code 0 --severity ${SCAN_FS_SEVERITY_DISPLAY} "${SCAN_FS_PATH}"
   trivy fs --scanners secret --exit-code ${SCAN_FS_ERROR} --severity "${SCAN_FS_SEVERITY_TRIGGER}" --ignorefile /trivyignore.yaml --show-suppressed "${SCAN_FS_PATH}"
 }
@@ -88,7 +85,7 @@ scan_image() {
   trivy image --exit-code 0 --format sarif --output "${SCAN_REPORT_PATH}/trivy_image.sarif" "${IMAGE_NAME}"
   trivy image --exit-code 0 --format template --template "@/contrib/junit.tpl" --output "${SCAN_REPORT_PATH}/trivy_image_junitxml.xml" "${IMAGE_NAME}"
   trivy image --exit-code 0 --format template --template "@/contrib/html.tpl"  --output "${SCAN_REPORT_PATH}/trivy_image.html" "${IMAGE_NAME}"
-  trivy image --exit-code 0 --format cyclonedx --output "${SCAN_REPORT_PATH}/trivy_image.cdx.json" "${IMAGE_NAME}" --scanners vuln
+  trivy image --exit-code 0 --format cyclonedx --output "${SCAN_REPORT_PATH}/trivy_image.cdx.json" --scanners vuln "${IMAGE_NAME}" --scanners vuln
   trivy image --exit-code 0 --severity ${SCAN_IMAGE_SEVERITY_DISPLAY} "${IMAGE_NAME}"
   trivy image --exit-code ${SCAN_IMAGE_ERROR} --severity "${SCAN_IMAGE_SEVERITY_TRIGGER}" --ignorefile /trivyignore.yaml --show-suppressed "${IMAGE_NAME}"   
 }
@@ -101,7 +98,7 @@ scan_sbom() {
   trivy sbom --exit-code 0 --format sarif --output "${SCAN_REPORT_PATH}/trivy_sbom.sarif" "${SCAN_SBOM_FILE}"
   trivy sbom --exit-code 0 --format template --template "@/contrib/junit.tpl" --output "${SCAN_REPORT_PATH}/trivy_sbom.junitxml.xml" "${SCAN_SBOM_FILE}"
   trivy sbom --exit-code 0 --format template --template "@/contrib/html.tpl"  --output "${SCAN_REPORT_PATH}/trivy_sbom.html" "${SCAN_SBOM_FILE}"
-  trivy sbom --exit-code 0 --format cyclonedx --output "${SCAN_REPORT_PATH}/trivy_sbom.cdx.json" "${SCAN_SBOM_FILE}"
+  trivy sbom --exit-code 0 --format cyclonedx --output "${SCAN_REPORT_PATH}/trivy_sbom.cdx.json" --scanners vuln "${SCAN_SBOM_FILE}"
   trivy sbom --exit-code 0 --severity ${SCAN_SBOM_SEVERITY_DISPLAY} "${SCAN_SBOM_FILE}"
   trivy sbom --exit-code ${SCAN_SBOM_ERROR}  --severity "${SCAN_SBOM_SEVERITY_TRIGGER}" --ignorefile /trivyignore.yaml --show-suppressed "${SCAN_SBOM_FILE}"
 }
