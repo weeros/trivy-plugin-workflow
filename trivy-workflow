@@ -60,7 +60,19 @@ function scan_fs() {
   trivy fs --exit-code 0 --format cyclonedx --output "${SCAN_REPORT_PATH}/trivy_fs.cdx.json" "${SCAN_FS_PATH}"
   trivy fs --exit-code 0 --severity ${SCAN_FS_SEVERITY_DISPLAY} "${SCAN_FS_PATH}"
   trivy fs --exit-code ${SCAN_FS_ERROR} --severity "${SCAN_FS_SEVERITY_TRIGGER}" --ignorefile /trivyignore.yaml --show-suppressed "${SCAN_FS_PATH}"
+}
 
+function scan_secret() {
+  SCAN_FS_PATH=$1
+  echo "scan: $SCAN_FS_PATH"
+  trivy fs --download-db-only 
+  trivy fs --scanners secret --exit-code 0 --format json --output "${SCAN_REPORT_PATH}/trivy_fs.json" "${SCAN_FS_PATH}"
+  trivy fs --scanners secret --exit-code 0 --format sarif --output "${SCAN_REPORT_PATH}/trivy_fs.sarif" "${SCAN_FS_PATH}"
+  trivy fs --scanners secret --exit-code 0 --format template --template "@/contrib/junit.tpl" --output "${SCAN_REPORT_PATH}/trivy_fs.junitxml.xml" "${SCAN_FS_PATH}"
+  trivy fs --scanners secret --exit-code 0 --format template --template "@/contrib/html.tpl"  --output "${SCAN_REPORT_PATH}/trivy_fs.html" "${SCAN_FS_PATH}"
+  trivy fs --scanners secret --exit-code 0 --format cyclonedx --output "${SCAN_REPORT_PATH}/trivy_fs.cdx.json" "${SCAN_FS_PATH}"
+  trivy fs --scanners secret --exit-code 0 --severity ${SCAN_FS_SEVERITY_DISPLAY} "${SCAN_FS_PATH}"
+  trivy fs --scanners secret --exit-code ${SCAN_FS_ERROR} --severity "${SCAN_FS_SEVERITY_TRIGGER}" --ignorefile /trivyignore.yaml --show-suppressed "${SCAN_FS_PATH}"
 }
 
 function scan_image() {
@@ -107,6 +119,12 @@ while [[ $# -gt 0 ]]; do
       shift # Past value.
       ;;
     -s|--sbom)
+      report;
+      scan_sbom $2;
+      shift # Past argument.
+      shift # Past value.
+      ;;
+    -t|--secret)
       report;
       scan_sbom $2;
       shift # Past argument.
