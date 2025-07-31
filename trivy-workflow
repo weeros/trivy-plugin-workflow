@@ -22,7 +22,7 @@ SCAN_IMAGE_SEVERITY_TRIGGER="CRITICAL"
 usage()
 {
   cat << EOS >&2
-Usage: trivy workflow [-h,--help] TYPE 
+Usage: trivy workflow [-h,--help] TYPE OPTION
  A Trivy plugin that workflow scans.
 
 Options:
@@ -30,13 +30,16 @@ Options:
 
 Examples:
   # Scan a filesystem
-  trivy workflow --fs
+  trivy workflow fs .
+  
+  # Scan a secret
+  trivy workflow secret .
 
   # Scan a sbom file
-  trivy workflow --sbom
+  trivy workflow sbom file.cdx.json
 
   # Scan an image
-  trivy workflow --image
+  trivy workflow image app:latest
 EOS
   exit
 }
